@@ -3,7 +3,7 @@ create database security;
 use security;
 
 create table security_network
-    (location       varchar(30),
+    (loc            varchar(30),
      network_num    varchar(8),
      primary key    (network_num)
     );
@@ -12,22 +12,31 @@ create table employee
     (employee_id    varchar(8),
      lname          varchar(15),
      fname          varchar(15),
-     primary key    (employee_id)
+     network_num    varchar(8),
+     primary key    (employee_id),
+     foreign key    (network_num) references security_network(network_num)
     );
 
 create table home
-    (name           varchar(15),
-     contact        varchar(25),
+    (home_name      varchar(15),
+     contact        varchar(15),
      street_address varchar(40),
-     primary key    (street_address)
+     network_num    varchar(8),
+     primary key    (street_address),
+     foreign key    (network_num) references security_network(network_num)
     );
 
 create table outdoor_camera
-    (number         varchar(15),
-     location       varchar(25),
+    (num            int,
+     loc            varchar(25),
      IP             varchar(10),
-     name           varchar(15),
-     primary key    (IP, name)
+     cam_name       varchar(15),
+     street_address varchar(40),
+     unique         (number),
+     network_id     varchar(8),
+     primary key    (IP),
+     foreign key    (street_address) references home(street_address),
+     foreign key    (network_id) references camera_network(network_id)
     );
 
 create table camera_network
@@ -39,22 +48,30 @@ create table camera_network
 create table incident
     (instrusion_type    varchar(15),
      lost_equity        varchar(10),
-     time               varchar(15),
-     day                varchar(15),
+     occured_time       time,
+     day                date,
      incident_id        varchar(8),
-     primary key        (incident_id)
+     street_address     varchar(40),
+     network_id         varchar(8),
+     primary key        (incident_id),
+     foreign key        (street_address) references home(street_address),
+     foreign key        (network_id) references camera_network(network_id)
     ):
 
 create table security_device
     (device_type        varchar(15),
      serial_no          varchar(15),
      device_IP          varchar(10),
-     primary key        (serial_no, device_IP)
+     street_address     varchar(40),
+     primary key        (serial_no, device_IP),
+     foreign key        (street_address) references home(street_address)
     );
 
 create table homeowner
     (homeowner_lname     varchar(15),
      homeowner_fname     varchar(15),
      customer_id         varchar(8),
-     primary key         (customer_id)
+     street_address      varchar(40),
+     primary key         (customer_id),
+     foreign key         (street_address) references home(street_address)
     );
