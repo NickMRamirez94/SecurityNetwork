@@ -38,7 +38,7 @@ create table outdoor_camera
      IP             varchar(10),
      cam_name       varchar(15),
      street_address varchar(40),
-     unique         (number),
+     unique         (num),
      network_id     varchar(8),
      primary key    (IP),
      foreign key    (street_address) references home(street_address),
@@ -56,7 +56,7 @@ create table incident
      primary key        (incident_id),
      foreign key        (street_address) references home(street_address),
      foreign key        (network_id) references camera_network(network_id)
-    ):
+    );
 
 create table security_device
     (device_type        varchar(15),
