@@ -26,6 +26,12 @@ create table home
      foreign key    (network_num) references security_network(network_num)
     );
 
+create table camera_network
+    (server_IP      varchar(10),
+     network_id     varchar(8),
+     primary key    (network_id)
+    );
+
 create table outdoor_camera
     (num            int,
      loc            varchar(25),
@@ -37,12 +43,6 @@ create table outdoor_camera
      primary key    (IP),
      foreign key    (street_address) references home(street_address),
      foreign key    (network_id) references camera_network(network_id)
-    );
-
-create table camera_network
-    (server_IP      varchar(10),
-     network_id     varchar(8),
-     primary key    (network_id)
     );
 
 create table incident
