@@ -41,7 +41,6 @@ def WelcomeClient(username):
 
     query = ("SELECT homeowner_lname, homeowner_fname, home_name, street_address FROM homeowner NATURAL JOIN home WHERE username=%s")
     cursor.execute(query, (username))
-    cursor.close()
 
     for (homeowner_lname, homeowner_fname, home_name, street_address) in cursor:
         print
@@ -49,9 +48,11 @@ def WelcomeClient(username):
         print("Hello" + homeowner_fname + " " + homeowner_lname + "\nYour home name is: " + home_name + " and you live on: " + street_address)
         print "-----------------------------------------------"
         
-    choice == 99
+    cursor.close()
 
-    while (choice != 4):
+    choice = 99
+
+    while (choice != 3):
         choice = MenuClient()
 
         if (choice == 0):
@@ -59,10 +60,8 @@ def WelcomeClient(username):
         elif (choice == 1):
             AddCameras(username)
         elif (choice == 2):
-            JoinNetwork(username)
+            DeleteCameras(username)
         elif (choice == 3):
-            LeaveNetwork(username)
-        elif (choice == 4):
             pass
         else:
             print "Sorry that is an invalid choice!\n"
@@ -70,19 +69,24 @@ def WelcomeClient(username):
 def WelcomeAdmin(username):
     cursor = cnx.cursor()
 
-    query = ("SELECT lname, fname FROM employee WHERE username=%s")
+    print("\n" + username + "\n")
+    query = ("SELECT * FROM employee WHERE username='%s'")
     cursor.execute(query, (username))
-    cursor.close()
 
+    row = cursor.fetchall()
+    cursor.close()
+    
+    print(row)
+    '''
     for (lname, fname) in cursor:
         print
         print "--------------------Welcome--------------------"
         print("Hello" + fname + " " + lname + "\n")
         print "-----------------------------------------------"
+    '''
+    choice = 99
 
-    choice == 99
-
-    while (choice != 4):
+    while (choice != 7):
         choice = MenuAdmin()
 
         if (choice == 0):
@@ -94,6 +98,12 @@ def WelcomeAdmin(username):
         elif (choice == 3):
             CreateNetwork()
         elif (choice == 4):
+            ViewIncidents()
+        elif (choice == 5):
+            AddSecurityDevices()
+        elif (choice == 6):
+            AddIncidents()
+        elif (choice == 7):
             pass
         else:
             print "Sorry that is an invalid choice!\n"
@@ -103,12 +113,11 @@ def MenuClient():
     print
     print "--------------------Menu--------------------"
     print "0. View Incidents on your Network"
-    print "1. Add Cameras to your network"
-    print "2. Join a Network"
-    print "3. Leave your Network"
-    print "4. Exit"
+    print "1. Add Cameras to a Network"
+    print "2. Delete a Camera from a Network"
+    print "3. Exit"
     print "--------------------------------------------"
-    choice = input("Enter your choice [0-4]:")
+    choice = input("Enter your choice [0-3]:")
     print
     return choice
 
@@ -119,10 +128,12 @@ def MenuAdmin():
     print "1. Delete User"
     print "2. Delete Network"
     print "3. Create Network"
-    print "4. Exit"
+    print "4. View Incidents associated with user"
+    print "5. Add security devices associated with user"
+    print "6. Add incidents associated with user"
+    print "7. Exit"
     print "--------------------------------------------"
-    choice = input("Enter your choice [0-4]:")
-    print
+    choice = input("Enter your choice [0-7]:")
     return choice
 
 
@@ -139,11 +150,7 @@ def ViewIncidents(username):
 def AddCameras(username):
     print
 
-def JoinNetwork(username):
-    print
-
-
-def LeaveNetwork(username):
+def DeleteCameras(username):
     print
 
 def CreateUser(username):
@@ -156,6 +163,16 @@ def DeleteNetwork():
     print
 
 def CreateNetwork():
+    print
+
+#for the admin so must ask admin for the users username
+def ViewIncidents():
+    print
+
+def AddSecurityDevices():
+    print
+
+def AddIncidents():
     print
 
 def main():

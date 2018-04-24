@@ -35,12 +35,15 @@ create table home
 create table camera_network
     (server_IP      varchar(13),
      network_id     varchar(8) not null,
+     network_num    varchar(8),
      unique         (server_IP),
-     primary key    (network_id)
+     primary key    (network_id),
+     foreign key    (network_num) references security_network(network_num)
+                    on delete set null
     );
 
 create table outdoor_camera
-    (IP             varchar(10) not null,
+    (IP             varchar(13) not null,
      cam_name       varchar(40),
      street_address varchar(40),
      network_id     varchar(8),
@@ -67,11 +70,10 @@ create table incident
     );
 
 create table security_device
-    (device_type        varchar(15),
-     serial_no          varchar(15) not null,
-     device_IP          varchar(10) not null,
+    (device_type        varchar(25),
+     device_IP          varchar(13) not null,
      street_address     varchar(40),
-     primary key        (serial_no, device_IP),
+     primary key        (device_IP),
      foreign key        (street_address) references home(street_address)
                         on delete cascade
     );
@@ -98,7 +100,7 @@ INSERT employee VALUES
 ('74839654', 'Brassfield', 'David', 'dbfield12', 'David', '00987891'),
 ('35278908', 'Ramirez', 'Nicholas', 'nramirez', 'Nick', '11435267'),
 ('76454435', 'Curam', 'Ajay', 'acuram', 'Ajay', '11435267'),
-('77789000', 'Jones', 'Julio' 'jjones', 'Julio', '00987891');
+('77789000', 'Jones', 'Julio', 'jjones', 'Julio', '00987891');
 
 INSERT home VALUES
 ('Home 1', '(123) 123-4567', '255 Hayward Drive', '00987891'),
@@ -107,31 +109,30 @@ INSERT home VALUES
 ('Home 4', '(925) 333-5645', '555 Greenville Drive', '11435267');
 
 INSERT camera_network VALUES
-('123.456.90.87', '87654564'),
-('999.345.67.45', '99994453');
+('123.456.90.87', '87654564', '00987891'),
+('999.345.67.45', '99994453', '11435267');
 
 INSERT outdoor_camera VALUES
-('546.888.34.54', '', '', ''),
-('123.986.56.39', '', '', ''),
-('165.990.89.01', '', '', ''),
-('444.333.29.87', '', '', ''),
-('324.091.90.89', '', '', ''),
-('782.324.90.18', '', '', ''),
-('098.178.89.22', '', '', ''),
-('564.236.89.78', '', '', '');
+('546.888.34.54', 'Cam1-Backyard', '255 Hayward Drive', '87654564'),
+('123.986.56.39', 'Cam2-FrontYard', '255 Hayward Drive', '87654564'),
+('165.990.89.01', 'MyCamera-Garage', '8989 Dos Equis Lane', '87654564'),
+('444.333.29.87', 'MyCamera-Pool', '8989 Dos Equis Lane', '87654564'),
+('324.091.90.89', 'Camera-Driveway', '1212 Wayward Court', '99994453'),
+('782.324.90.18', 'Camera-SlidingDoor', '1212 Wayward Court', '99994453'),
+('098.178.89.22', 'TheCamera-Front1', '555 Greenville Drive', '99994453'),
+('564.236.89.78', 'TheCamera-Front2', '555 Greenville Drive', '99994453');
 
 INSERT incident VALUES
-();
+('Break_and_Enter', '$150', '04:20:00', '1993-04-12', '88888888', '8989 Dos Equis Lane', '87654564');
 
 INSERT security_device VALUES
-(),
-(),
-(),
-();
+('Smoke Detector', '443.578.67.90', '8989 Dos Equis Lane'),
+('Carbon Monoxide Detector', '231.457.58.85', '8989 Dos Equis Lane'),
+('Smoke Detector', '844.345.99.00', '255 Hayward Drive'),
+('Motion Detector', '120.902.20.02', '255 Hayward Drive');
 
 INSERT homeowner VALUES
-(),
-(),
-(),
-();
-
+('Otto', 'Jim', '75640298', '255 Hayward Drive', 'Jim', 'jotto'),
+('Woodson', 'Charles', '75820931', '8989 Dos Equis Lane', 'Oaky', 'lumber'),
+('Jett', 'James', '98756519', '1212 Wayward Court', 'JJ', 'fastest'),
+('Gannon', 'Rich', '88787232', '555 Greenville Drive', 'Richyboi', 'interception');
