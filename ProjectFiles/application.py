@@ -2,7 +2,7 @@ import mysql.connector
 from mysql.connector import errorcode
 from cryptography.fernet import Fernet
 
-cnx = mysql.connector.connect(user='root', password='smackdown2', database='security')
+cnx = mysql.connector.connect(user='root', password='password', database='security')
 
 def Login():
     username = raw_input("Username: ")
@@ -148,32 +148,32 @@ def ViewIncidents(username):
         print(results)
 
 def AddCameras(username):
-    print
+    pass
 
 def DeleteCameras(username):
-    print
+    pass
 
 def CreateUser(username):
-    print
+    pass
 
 def DeleteUser(username):
-    print
+    pass
 
 def DeleteNetwork():
-    print
+    pass
 
 def CreateNetwork():
-    print
+    pass
 
 #for the admin so must ask admin for the users username
 def ViewIncidents():
-    print
+    pass
 
 def AddSecurityDevices():
-    print
+    pass
 
 def AddIncidents():
-    print
+    pass
 
 def main():
 
