@@ -10,6 +10,7 @@ create table security_network
 
 create table employee
     (employee_id    varchar(8) not null,
+     supervisor     boolean default false,
      lname          varchar(15),
      fname          varchar(15),
      username       varchar(45),
@@ -97,10 +98,11 @@ INSERT security_network VALUES
 ('San Francisco', '11435267');
 
 INSERT employee VALUES
-('74839654', 'Brassfield', 'David', 'dbfield12', 'David', '00987891'),
-('35278908', 'Ramirez', 'Nicholas', 'nramirez', 'Nick', '11435267'),
-('76454435', 'Curam', 'Ajay', 'acuram', 'Ajay', '11435267'),
-('77789000', 'Jones', 'Julio', 'jjones', 'Julio', '00987891');
+('74839654', true, 'Brassfield', 'David', 'dbfield12', 'David', '00987891'),
+('35278908', false, 'Ramirez', 'Nicholas', 'nramirez', 'Nick', '11435267'),
+('76454435', false, 'Curam', 'Ajay', 'acuram', 'Ajay', '11435267'),
+('77789000', false, 'Jones', 'Julio', 'jjones', 'Julio', '00987891');
+
 
 INSERT home VALUES
 ('Home 1', '(123) 123-4567', '255 Hayward Drive', '00987891'),
