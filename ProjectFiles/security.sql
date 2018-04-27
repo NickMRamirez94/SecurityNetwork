@@ -90,7 +90,7 @@ create table homeowner
      unique              (pass),
      primary key         (customer_id),
      foreign key         (street_address) references home(street_address)
-                        on delete set null
+                          on delete set null
     );
 
 INSERT security_network VALUES
@@ -108,7 +108,8 @@ INSERT home VALUES
 ('Home 1', '(123) 123-4567', '255 Hayward Drive', '00987891'),
 ('Home 2', '(215) 777-8255', '8989 Dos Equis Lane', '00987891'),
 ('Home 3', '(510) 234-8989', '1212 Wayward Court', '11435267'),
-('Home 4', '(925) 333-5645', '555 Greenville Drive', '11435267');
+('Home 4', '(925) 333-5645', '555 Greenville Drive', '11435267'),
+('Home 5', '(888) 111-2244', '31 Orangevale Road', '11435267');
 
 INSERT camera_network VALUES
 ('123.456.90.87', '87654564', '00987891'),
