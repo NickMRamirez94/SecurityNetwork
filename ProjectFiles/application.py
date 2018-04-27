@@ -2,7 +2,7 @@ import mysql.connector
 from mysql.connector import errorcode
 from cryptography.fernet import Fernet
 
-cnx = mysql.connector.connect(user='root', password='password', database='security')
+cnx = mysql.connector.connect(user='root', password='smackdown2', database='security')
 
 def Login():
     username = raw_input("Username: ")
@@ -53,16 +53,16 @@ def VerifySupervisor(username, password):
 def WelcomeClient(username):
     cursor = cnx.cursor()
 
-    query = ("SELECT homeowner_lname, homeowner_fname, home_name, street_address FROM homeowner NATURAL JOIN home WHERE username=%s")
+    query = ("SELECT homeowner_fname, homeowner_lname, home_name, street_address FROM homeowner NATURAL JOIN home WHERE username=")
+    query = query + "'" + username + "'"
     cursor.execute(query, (username))
-
-    for (homeowner_lname, homeowner_fname, home_name, street_address) in cursor:
-        print
-        print("--------------------Welcome--------------------")
-        print("Hello" + homeowner_fname + " " + homeowner_lname + "\nYour home name is: " + home_name + " and you live on: " + street_address)
-        print("-----------------------------------------------")
-        
+    result = cursor.fetchone()
     cursor.close()
+
+    print
+    print("--------------------Welcome--------------------")
+    print("Hello " + result[0] + " " + result[1] + "\nYour home is: " + result[2] + "\nYour address is: " + result[3])
+    print("-----------------------------------------------")
 
     choice = 99
 
@@ -86,14 +86,14 @@ def WelcomeAdmin(username):
     query = ("SELECT fname, lname FROM employee WHERE username=")
     query = query + "'" + username + "'"
     cursor.execute(query)
-
-    for (fname, lname) in cursor:
-        print
-        print("--------------------Welcome--------------------")
-        print("Hello " + fname + " " +  lname)
-        print("-----------------------------------------------")
-
+    result = cursor.fetchone()
     cursor.close()
+
+    print
+    print("--------------------Welcome--------------------")
+    print("Hello " + result[0] + " " +  result[1])
+    print("-----------------------------------------------")
+
 
     choice = 99
 
