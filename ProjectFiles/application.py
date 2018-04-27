@@ -2,7 +2,7 @@ import mysql.connector
 from mysql.connector import errorcode
 from cryptography.fernet import Fernet
 
-cnx = mysql.connector.connect(user='root', password='smackdown2', database='security')
+cnx = mysql.connector.connect(user='root', password='password', database='security')
 
 def Login():
     username = raw_input("Username: ")
