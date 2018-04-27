@@ -4,12 +4,18 @@ from cryptography.fernet import Fernet
 
 cnx = mysql.connector.connect(user='root', password='password', database='security')
 
+########################################################################################
+##Initial function called in main(). Will return the username and password of the user##
+####################################################################################### 
 def Login():
     username = raw_input("Username: ")
     password = raw_input("Password: ")
 
     return username, password
 
+#############################################################################
+##Used to verify that user is a Client. Returns TRUE if so. FALSE otherwise##
+############################################################################
 def VerifyClient(username, password):
     cursor = cnx.cursor()
 
@@ -23,6 +29,9 @@ def VerifyClient(username, password):
     else:
         return False
 
+#############################################################################
+##Used to verify that user is an Admin. Returns TRUE if so. FALSE otherwise##
+#############################################################################
 def VerifyAdmin(username, password):
     cursor = cnx.cursor()
 
@@ -37,19 +46,9 @@ def VerifyAdmin(username, password):
     else:
         return False
 
-def VerifySupervisor(username, password):
-    cursor = cnx.cursor()
-
-    query = ("SELECT * FROM supervisor WHERE username=%s and pass=%s")
-    cursor.execute(query, (username, password))
-    result = cursor.fetchall()
-    cursor.close()
-
-    if len(result) > 0:
-        return True
-    else:
-        return False
-
+########################################################################################
+##Displays a welcome message to the client and calls MenuClient() to find their choice##
+########################################################################################
 def WelcomeClient(username):
     cursor = cnx.cursor()
 
@@ -80,6 +79,9 @@ def WelcomeClient(username):
         else:
             print("Sorry that is an invalid choice!\n")
 
+######################################################################################
+##Displays a welcome message to the admin and calls MenuAdmin() to find their choice##
+######################################################################################
 def WelcomeAdmin(username):
     cursor = cnx.cursor()
 
@@ -119,8 +121,11 @@ def WelcomeAdmin(username):
         elif (choice == 8):
             pass
         else:
-            print("Sorry that is an invalid choice!\n")   
+            print("Sorry that is an invalid choice!\n")  
 
+#########################################
+##Main menu for the client (homeowners)##
+#########################################
 def MenuClient():
     print
     print("--------------------Menu--------------------")
@@ -133,6 +138,9 @@ def MenuClient():
     print
     return choice
 
+############################
+##Main menu for the admin##
+###########################
 def MenuAdmin():
     print
     print("--------------------Menu--------------------")
@@ -149,6 +157,9 @@ def MenuAdmin():
     choice = input("Enter your choice [0-8]:")
     return choice
 
+########################################################################################################
+##Menu for the supevisor. If SupervisorFunctions verifys employee is a supervisor. This will be called##
+########################################################################################################
 def MenuSupervisor():
     print
     print("--------------------Menu--------------------")
@@ -160,7 +171,9 @@ def MenuSupervisor():
     choice = input("Enter your choice [0-3]:")
     return choice
 
-#check if supervisor. If not return immediatley
+##################################################
+##Check if supervisor. If not return immediatley##
+##################################################
 def SupervisorFunctions(username):
     cursor = cnx.cursor()
 
@@ -186,6 +199,10 @@ def SupervisorFunctions(username):
                 print("Sorry that is not a valid choice!\n")
     else:
         print("Sorry you are not a supervisor!\nThank you. Come again.\n")
+
+############################
+##        DO              ##
+############################
 
 def ViewIncidents(username):
     cursor = cnx.cursor()
@@ -215,7 +232,6 @@ def DeleteNetwork():
 def CreateNetwork():
     pass
 
-#for the admin so must ask admin for the users username
 def ViewIncidents():
     pass
 
@@ -225,15 +241,26 @@ def AddSecurityDevices():
 def AddIncidents():
     pass
 
+#DAVID
 def AddEmployee():
     pass
 
+#DAVID
 def AddSecurityNetwork():
     pass
 
+#DAVID
 def DeleteEmployee():
     pass
 
+
+#########################
+#########################
+##                     ##
+##    MAIN FUNCTION    ##
+##                     ##
+#########################
+#########################
 def main():
 
     username, password = Login()
