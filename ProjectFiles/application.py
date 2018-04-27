@@ -2,7 +2,7 @@ import mysql.connector
 from mysql.connector import errorcode
 from cryptography.fernet import Fernet
 
-cnx = mysql.connector.connect(user='root', password='password', database='security')
+cnx = mysql.connector.connect(user='root', password='smackdown2', database='security')
 
 ########################################################################################
 ##Initial function called in main(). Will return the username and password of the user##
@@ -99,7 +99,7 @@ def WelcomeAdmin(username):
 
     choice = 99
 
-    while (choice != 10):
+    while (choice != 9):
         choice = MenuAdmin()
 
         if (choice == 0):
@@ -107,22 +107,20 @@ def WelcomeAdmin(username):
         elif (choice == 1):
             CreateHome(username)
         elif (choice ==2):
-            DeleteHome()
+            DeleteHome(username)
         elif (choice == 3):
-            DeleteUser()
+            DeleteCameraNetwork()
         elif (choice == 4):
-            DeleteNetwork()
+            CreateCameraNetwork()
         elif (choice == 5):
-            CreateNetwork()
-        elif (choice == 6):
             ViewIncidents()
-        elif (choice == 7):
+        elif (choice == 6):
             AddSecurityDevices()
-        elif (choice == 8):
+        elif (choice == 7):
             AddIncidents()
-        elif (choice == 9):
+        elif (choice == 8):
             SupervisorFunctions(username)
-        elif (choice == 10):
+        elif (choice == 9):
             pass
         else:
             print("Sorry that is an invalid choice!\n")  
@@ -134,11 +132,11 @@ def MenuClient():
     print
     print("--------------------Menu--------------------")
     print("0. View Incidents on your Network")
-    print("1. Add Cameras to a Network")
-    print("2. Delete a Camera from a Network")
+    print("1. Add Cameras to a Home")
+    print("2. Delete a Camera from a Home")
     print("3. Exit")
     print("--------------------------------------------")
-    choice = input("Enter your choice [0-3]:")
+    choice = input("Enter your choice [0-3]: ")
     print
     return choice
 
@@ -151,16 +149,15 @@ def MenuAdmin():
     print("0. Create new user")
     print("1. Create Home")
     print("2. Delete Home")
-    print("3. Delete User")
-    print("4. Delete Network")
-    print("5. Create Network")
-    print("6. View Incidents associated with user")
-    print("7. Add security devices associated with user")
-    print("8. Add incidents associated with user")
-    print("9. Supervisor Functions")
-    print("10. Exit")
+    print("3. Delete Camera Network")
+    print("4. Create Camera Network")
+    print("5. View Incidents associated with user")
+    print("6. Add security devices associated with user")
+    print("7. Add incidents associated with user")
+    print("8. Supervisor Functions")
+    print("9. Exit")
     print("--------------------------------------------")
-    choice = input("Enter your choice [0-10]:")
+    choice = input("Enter your choice [0-9]: ")
     return choice
 
 ########################################################################################################
@@ -174,7 +171,7 @@ def MenuSupervisor():
     print("2. Delete an Employee")
     print("3. Exit")
     print("--------------------------------------------")
-    choice = input("Enter your choice [0-3]:")
+    choice = input("Enter your choice [0-3]: ")
     return choice
 
 ##################################################
@@ -292,8 +289,10 @@ def CreateUser():
 
     cursor.close()
 
-
-
+##############################################################################################
+##Used to create a home. The employee must have all pertinent information for the home to be##
+##                                        added to the system.                              ##
+##############################################################################################
 def CreateHome(username):
     print
     print("--------------------Home Creation--------------------")
@@ -351,34 +350,245 @@ def CreateHome(username):
 
     cursor.close()
 
-def DeleteHome():
+##############################################################################################
+##Used to delete a home. The employee must have all pertinent information for the home to be##
+##                                    deleted from the system.                              ##
+##############################################################################################
+def DeleteHome(username):
+    print
+    print("--------------------Home Deletion--------------------")
+    print("Here is where we will be able to delete a home")
+    print("You will need to enter all the pertinent information so")
+    print("that a home can be removed from the system. Thank you.")
+    print("-----------------------------------------------------")
+    print
+    print
+
+    #Retrieve network number
+    cursor = cnx.cursor()
+    query = ("SELECT network_num FROM security_network NATURAL JOIN")
+    query = query + "employee WHERE employee.username="
+    query = query + "'" + username + "'"
+    cursor.execute(query)
+    result = cursor.fetchone()
+    cursor.close()
+    network_num = result[0]
+
+    choice = 2
+    while (choice != 1):
+        street_address = raw_input("Street Address: ")
+
+        print("Please confirm this information.")
+        print
+        print("Street Address: " + street_address)
+        print
+
+        choice = input("1 to confirm. 0 to go back.")
+
+    cursor = cnx.cursor()
+
+    delete_home = ("DELETE h FROM home as h NATURAL JOIN security_network as s")
+    delete_home = delete_home + "WHERE h.network_num="
+    delete_home = delete_home + "'" + network_num + "' "
+    delete_home = delete_home + "AND h.street_address="
+    delete_home = delete_home + "'" + street_address + "'"
+    
+    try:
+        print("Deleting home from system.....")
+        print
+        cursor.execute(delete_home)
+        cnx.commit()
+        print("...Done..")
+        print
+    except mysql.connector.Error as err:
+        print("Sorry an error occured. Most likely that home is not in the system or is not in your network!\n")
+
+    cursor.close()
+
+##############################################################################################
+##Used to delete a Camera Network. The employee must have all pertinent information for     ##
+##                           the Camera Network to be deleted from the system.              ##
+##############################################################################################
+def DeleteCameraNetwork():
     pass
 
-def DeleteUser(username):
-    pass
+##############################################################################################
+##Used to create a Camera Network. The employee must have all pertinent information for     ##
+##                           the Camera Network to be entered into the system.              ##
+##############################################################################################
+def CreateCameraNetwork():
+    print
+    print("-----------------Create Camera Network----------------")
+    print("Here is where we will be able to create a Camera")
+    print("Network.You will need to enter all the pertinent information")
+    print("so that a Camera Network can be added to the system. Thank you.")
+    print("**The Security Network must be in system before the Camera Network**")
+    print("-----------------------------------------------------")
+    print
+    print
 
-def DeleteNetwork():
-    pass
+    choice = 2
+    while (choice != 1):
+        device_type = raw_input("Device Type: ")
+        device_IP = raw_input("Device IP: ")
+        street_address = raw_input("Street Address: ")
 
-def CreateNetwork():
-    pass
+        print("Please confirm this information.")
+        print
+        print("Device Type: " + device_type)
+        print("Device IP: " + device_IP)
+        print("Street Address: " + street_address)
+        print
 
+        choice = input("1 to confirm. 0 to reenter information.\n")
 
+    cursor = cnx.cursor()
+
+    add_security_device = ("INSERT security_device VALUES (")
+    add_security_device = add_security_device + "'" + device_type + "', "
+    add_security_device = add_security_device + "'" + device_IP + "', "
+    add_security_device = add_security_device + "'" + street_address + "');"
+    
+    try:
+        print("Entering security devices into system.....")
+        print
+        cursor.execute(add_security_device)
+        cnx.commit()
+        print("...Done..")
+        print
+    except mysql.connector.Error as err:
+        print("Sorry an error occured. Most likely that home is not in the system yet!\n")
+
+    cursor.close()
+
+##############################################################################################
+##Used to create a Security Device. The employee must have all pertinent information for    ##
+##                           the Security Device to be added to a home.                     ##
+##############################################################################################
 def AddSecurityDevices():
-    pass
+    print
+    print("-----------------Add Security Devices----------------")
+    print("Here is where we will be able to add security devices to")
+    print("a home.You will need to enter all the pertinent information")
+    print("so that a user can be added to the system. Thank you.")
+    print("**The home must be in system before security devices**")
+    print("-----------------------------------------------------")
+    print
+    print
 
+    choice = 2
+    while (choice != 1):
+        device_type = raw_input("Device Type: ")
+        device_IP = raw_input("Device IP: ")
+        street_address = raw_input("Street Address: ")
+
+        print("Please confirm this information.")
+        print
+        print("Device Type: " + device_type)
+        print("Device IP: " + device_IP)
+        print("Street Address: " + street_address)
+        print
+
+        choice = input("1 to confirm. 0 to reenter information.\n")
+
+    cursor = cnx.cursor()
+
+    add_security_device = ("INSERT security_device VALUES (")
+    add_security_device = add_security_device + "'" + device_type + "', "
+    add_security_device = add_security_device + "'" + device_IP + "', "
+    add_security_device = add_security_device + "'" + street_address + "');"
+    
+    try:
+        print("Entering security devices into system.....")
+        print
+        cursor.execute(add_security_device)
+        cnx.commit()
+        print("...Done..")
+        print
+    except mysql.connector.Error as err:
+        print("Sorry an error occured. Most likely that home is not in the system yet!\n")
+
+    cursor.close()
+
+##############################################################################################
+##Used to add an Incident to a home. The employee must have all pertinent information for   ##
+##                           the Incident to be added to a home.                            ##
+##############################################################################################
 def AddIncidents():
-    pass
+    print
+    print("---------------------Add Incidents-------------------")
+    print("Here is where we will be able to add incidents to")
+    print("a home.You will need to enter all the pertinent information")
+    print("so that an incident can be added to the system. Thank you.")
+    print("**The home must be in system before the incident**")
+    print("-----------------------------------------------------")
+    print
+    print
 
-#DAVID
+    choice = 2
+    while (choice != 1):
+        instrusion_type = raw_input("Intrusion Type: ")
+        lost_equity = raw_input("Lost Equity: ")
+        occured_time = raw_input("Occured Time **hh:mm:ss**: ")
+        current_day = raw_input("Day Occured **yyyy:mm:dd**: ")
+        incident_id = raw_input("Incident ID: ")
+        street_address = raw_input("Street Address: ")
+        network_id = raw_input("Network ID: ")
+
+        print("Please confirm this information.")
+        print
+        print("Instrusion Type: " + instrusion_type)
+        print("Lost Equity: " + lost_equity)
+        print("Occured Time: " + occured_time)
+        print("Day Occured: " + current_day)
+        print("Incident ID: " + incident_id)
+        print("Street Address: " + street_address)
+        print("Network ID: " + network_id)
+        print
+
+        choice = input("1 to confirm. 0 to reenter information.\n")
+
+    cursor = cnx.cursor()
+
+    add_incident = ("INSERT incident VALUES (")
+    add_incident = add_incident + "'" + instrusion_type + "', "
+    add_incident = add_incident + "'" + lost_equity + "', "
+    add_incident = add_incident + "'" + occured_time + "', "
+    add_incident = add_incident + "'" + current_day + "', "
+    add_incident = add_incident + "'" + incident_id + "', "
+    add_incident = add_incident + "'" + street_address + "', "
+    add_incident = add_incident + "'" + network_id + "');"
+    
+    try:
+        print("Entering security devices into system.....")
+        print
+        cursor.execute(add_incident)
+        cnx.commit()
+        print("...Done..")
+        print
+    except mysql.connector.Error as err:
+        print("Sorry an error occured. Most likely that home is not in the system yet!\n")
+
+    cursor.close()
+
+##############################################################################################
+##Used to create an employee. The Supervisor must have all pertinent information and       ##
+##                         give the employee a temporary password.                         ##
+##############################################################################################
 def AddEmployee():
     pass
 
-#DAVID
+##############################################################################################
+##Used to create a Security network for a city. The Supervisor must have all pertinent     ##
+##             information for the Security Network to be added to the system              ##
+##############################################################################################
 def AddSecurityNetwork():
     pass
 
-#DAVID
+##############################################################################################
+##Used to delete an employee. The Supervisor must have all pertinent information to         ##
+##                         remove the employee from the system.                             ##
+##############################################################################################
 def DeleteEmployee():
     pass
 

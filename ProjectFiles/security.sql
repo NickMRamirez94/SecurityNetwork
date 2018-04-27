@@ -126,7 +126,7 @@ INSERT outdoor_camera VALUES
 ('564.236.89.78', 'TheCamera-Front2', '555 Greenville Drive', '99994453');
 
 INSERT incident VALUES
-('Break_and_Enter', '$150', '04:20:00', '1993-04-12', '88888888', '8989 Dos Equis Lane', '87654564');
+('Break and Enter', '$150', '04:20:00', '1993-04-12', '88888888', '8989 Dos Equis Lane', '87654564');
 
 INSERT security_device VALUES
 ('Smoke Detector', '443.578.67.90', '8989 Dos Equis Lane'),
