@@ -3,6 +3,7 @@ from mysql.connector import errorcode
 from cryptography.fernet import Fernet
 from prettytable import PrettyTable
 
+#Create a connection to the local database
 cnx = mysql.connector.connect(user='root', password='password', database='security')
 
 ########################################################################################
@@ -38,7 +39,6 @@ def VerifyAdmin(username, password):
 
     query = ("SELECT * FROM employee WHERE username=%s AND pass=%s")
     cursor.execute(query, (username, password))
-    
     result = cursor.fetchall()
     cursor.close()
 
@@ -60,9 +60,9 @@ def WelcomeClient(username):
     cursor.close()
 
     print
-    print("--------------------Welcome--------------------")
+    print("----------------------Welcome----------------------")
     print("Hello " + result[0] + " " + result[1] + "\nYour home is: " + result[2] + "\nYour address is: " + result[3])
-    print("-----------------------------------------------")
+    print("---------------------------------------------------")
 
     choice = 99
 
@@ -137,6 +137,7 @@ def MenuClient():
     print("2. Delete a Camera from a Home")
     print("3. Exit")
     print("--------------------------------------------")
+    print
     choice = input("Enter your choice [0-3]: ")
     print
     return choice
@@ -158,7 +159,9 @@ def MenuAdmin():
     print("8. Supervisor Functions")
     print("9. Exit")
     print("--------------------------------------------")
+    print
     choice = input("Enter your choice [0-9]: ")
+    print
     return choice
 
 ########################################################################################################
@@ -172,7 +175,9 @@ def MenuSupervisor():
     print("2. Delete an Employee")
     print("3. Exit")
     print("--------------------------------------------")
+    print
     choice = input("Enter your choice [0-3]: ")
+    print
     return choice
 
 ##################################################
@@ -202,10 +207,10 @@ def SupervisorFunctions(username):
             else:
                 print("Sorry that is not a valid choice!\n")
     else:
-        print("Sorry you are not a supervisor!\nThank you. Come again.\n")
+        print("Sorry you are not a Supervisor!\n")
 
 ##################################################################################################################
-##Will quiery all instrutions based on usernames address. Will not print anything unless there is an instrusion##
+## Will quiery all Incidents based on usernames address. Will not print anything unless there is an instrusion  ##
 ##################################################################################################################
 def ViewIncidents(username):
     cursor = cnx.cursor()
@@ -230,14 +235,14 @@ def ViewIncidents(username):
 ##############################################################################################
 def AddCameras(username):
     print
-    print("--------------------Add Cameras--------------------")
+    print("----------------------Add Cameras----------------------")
     print("Here is where we will be able to add cameras to a home")
     print("OR network. You will need to enter all the pertinent")
     print("information so that a user can be added to the system.")
-    print("-----------------------------------------------------")
+    print("-------------------------------------------------------")
     print
 
-    #Retrieve street address
+    #Retrieve street address. Every user will have an address
     cursor = cnx.cursor()
     query = ("SELECT street_address FROM homeowner WHERE username=")
     query = query + "'" + username + "'"
@@ -254,6 +259,7 @@ def AddCameras(username):
     results = cursor.fetchall()
     cursor.close()
 
+    #Check to see if user already has some Cameras.
     if len(results) > 0:
         tab = PrettyTable(['IP', 'Camera Name', 'Network ID'])
         for row in results:
@@ -266,9 +272,14 @@ def AddCameras(username):
 
     choice = 2
     while (choice != 1):
-        camera_IP = raw_input("Camera IP: ")
+        camera_IP = raw_input("Camera IP ** ###.###.##.## **: ")
         camera_name = raw_input("Camera Name: ")
         network_ID = raw_input("Network ID: ")
+        if (len(network_ID) != 8):
+            print
+            print("**Network ID must be 8 characters long. Try again.**")
+            print
+            continue
 
         print("\n_____________Please confirm this information_________________\n")
         print
@@ -313,7 +324,7 @@ def DeleteCameras(username):
     print
     print
 
-    #Retrieve street address
+    #Retrieve street address. Every user will have a street address.
     cursor = cnx.cursor()
     query = ("SELECT street_address FROM homeowner WHERE username=")
     query = query + "'" + username + "'"
@@ -337,37 +348,39 @@ def DeleteCameras(username):
         print("Here are the Cameras currently at your home.")
         print(tab)
         print
+
+        choice = 2
+        while (choice != 1):
+            camera_IP = raw_input("Camera IP: ")
+
+            print("\n_____________Please confirm this information_________________\n")
+            print
+            print("Camera IP: " + camera_IP)
+            print
+
+            choice = input("1 to confirm. 0 to go back.")
+
+        cursor = cnx.cursor()
+
+        delete_camera = ("DELETE c FROM outdoor_camera as c ")
+        delete_camera = delete_camera + "WHERE c.IP="
+        delete_camera = delete_camera + "'" + camera_IP + "' "
+        
+        try:
+            print("Deleting camera from system.....")
+            print
+            cursor.execute(delete_camera)
+            cnx.commit()
+            print("...Done..")
+            print
+        except mysql.connector.Error as err:
+            print("Sorry an error occured. Most likely that camera is not in the system or is not in your network!\n")
+
+        cursor.close()
     else:
         print("It looks like you do not have any cameras at this time. Lets add some!\n")
+        pass
 
-    choice = 2
-    while (choice != 1):
-        camera_IP = raw_input("Camera IP: ")
-
-        print("\n_____________Please confirm this information_________________\n")
-        print
-        print("Camera IP: " + camera_IP)
-        print
-
-        choice = input("1 to confirm. 0 to go back.")
-
-    cursor = cnx.cursor()
-
-    delete_camera = ("DELETE c FROM outdoor_camera as c ")
-    delete_camera = delete_camera + "WHERE c.IP="
-    delete_camera = delete_camera + "'" + camera_IP + "' "
-    
-    try:
-        print("Deleting camera from system.....")
-        print
-        cursor.execute(delete_camera)
-        cnx.commit()
-        print("...Done..")
-        print
-    except mysql.connector.Error as err:
-        print("Sorry an error occured. Most likely that camera is not in the system or is not in your network!\n")
-
-    cursor.close()
 
 ##############################################################################################
 ##Used to create a user. The employee must have all pertinent information and give the user##
@@ -391,9 +404,7 @@ def CreateUser():
         customer_id = raw_input("Customer id: ")
         if (len(customer_id) != 8):
             print
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            print("Sorry. The customer ID is not the correct length. Please try again")
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            print("**Sorry. The customer ID is not the correct length. Please try again**")
             print
             continue
         street_address = raw_input("Street Address: ")
@@ -449,7 +460,7 @@ def CreateHome(username):
     print
     print
 
-    #Retrieve network number
+    #Retrieve network number. Every employee will have a network number.
     cursor = cnx.cursor()
     query = ("SELECT network_num FROM security_network NATURAL JOIN ")
     query = query + "employee WHERE employee.username="
@@ -511,7 +522,7 @@ def DeleteHome(username):
     print
     print
 
-    #Retrieve network number
+    #Retrieve network number. All employees have a network number.
     cursor = cnx.cursor()
     query = ("SELECT network_num FROM security_network NATURAL JOIN ")
     query = query + "employee WHERE employee.username="
@@ -521,36 +532,57 @@ def DeleteHome(username):
     cursor.close()
     network_num = result[0]
 
-    choice = 2
-    while (choice != 1):
-        street_address = raw_input("Street Address: ")
-
-        print("\n_____________Please confirm this information_________________\n")
-        print
-        print("Street Address: " + street_address)
-        print
-
-        choice = input("1 to confirm. 0 to go back.")
-
+    #Show admin a list of all current homes.
     cursor = cnx.cursor()
-
-    delete_home = ("DELETE h FROM home as h NATURAL JOIN security_network as s ")
-    delete_home = delete_home + "WHERE h.network_num="
-    delete_home = delete_home + "'" + network_num + "' "
-    delete_home = delete_home + "AND h.street_address="
-    delete_home = delete_home + "'" + street_address + "'"
-    
-    try:
-        print("Deleting home from system.....")
-        print
-        cursor.execute(delete_home)
-        cnx.commit()
-        print("...Done..")
-        print
-    except mysql.connector.Error as err:
-        print("Sorry an error occured. Most likely that home is not in the system or is not in your network!\n")
-
+    query = ("SELECT home_name, contact, street_address ")
+    query = query + "FROM home "
+    query = query + "WHERE network_num="
+    query = query + "'" + network_num + "'"
+    cursor.execute(query)
+    results = cursor.fetchall()
     cursor.close()
+    
+    if (len(results) > 0):
+        tab = PrettyTable(['Home Name', 'Contact #', 'Street Address'])
+        for row in results:
+            tab.add_row([row[0], row[1], row[2]])
+        print("Here are the Homes currently in your network.")
+        print(tab)
+        print
+
+        choice = 2
+        while (choice != 1):
+            street_address = raw_input("Street Address: ")
+
+            print("\n_____________Please confirm this information_________________\n")
+            print
+            print("Street Address: " + street_address)
+            print
+
+            choice = input("1 to confirm. 0 to go back.")
+
+        cursor = cnx.cursor()
+
+        delete_home = ("DELETE h FROM home as h NATURAL JOIN security_network as s ")
+        delete_home = delete_home + "WHERE h.network_num="
+        delete_home = delete_home + "'" + network_num + "' "
+        delete_home = delete_home + "AND h.street_address="
+        delete_home = delete_home + "'" + street_address + "'"
+        
+        try:
+            print("Deleting home from system.....")
+            print
+            cursor.execute(delete_home)
+            cnx.commit()
+            print("...Done..")
+            print
+        except mysql.connector.Error as err:
+            print("Sorry an error occured. Most likely that home is not in the system or is not in your network!\n")
+
+        cursor.close()
+    
+    else:
+        print("Sorry there are no homes in your network at this time.")
 
 ##############################################################################################
 ##Used to delete a Camera Network. The employee must have all pertinent information for     ##
@@ -572,9 +604,7 @@ def DeleteCameraNetwork():
         network_id = raw_input("Camera Network ID: ")
         if (len(network_id) != 8):
             print
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            print("Sorry. The Network ID is not the correct length. Please try again")
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            print("**Sorry. The Network ID is not the correct length. Please try again**")
             print
             continue
 
@@ -624,9 +654,7 @@ def CreateCameraNetwork(username):
         network_id = raw_input("Camera Network ID: ")
         if (len(network_id) != 8):
             print
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            print("Sorry. The Camera Network ID is not the correct length. Please try again")
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            print("**Sorry. The Camera Network ID is not the correct length. Please try again**")
             print
             continue
 
@@ -735,7 +763,7 @@ def AddSecurityDevices():
     choice = 2
     while (choice != 1):
         device_type = raw_input("Device Type: ")
-        device_IP = raw_input("Device IP: ")
+        device_IP = raw_input("Device IP ** ###.###.##.## **: ")
         street_address = raw_input("Street Address: ")
 
         print("\n_____________Please confirm this information_________________\n")
@@ -790,9 +818,7 @@ def AddIncidents():
         incident_id = raw_input("Incident ID: ")
         if (len(incident_id) != 8):
             print
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            print("Sorry. The Incident ID is not the correct length. Please try again")
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            print("**Sorry. The Incident ID is not the correct length. Please try again**")
             print
             continue
         street_address = raw_input("Street Address: ")
