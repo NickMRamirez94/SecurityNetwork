@@ -23,7 +23,7 @@ create table employee
                     on delete set null
     );
 
-/*
+
 create table home
     (home_name      varchar(15), -
      contact        varchar(15), -
@@ -47,25 +47,10 @@ create table homeowner
      foreign key         (street_address) references home(street_address)-
                           on delete set null-
     );
-*/
+
 	
 	
-create table home_and_homeowner( --tables merged due to 1 : 1 relationship in ER Diagram.
-	home_name			varchar(15),
-	contact_info		varchar(15),
-	homeowner_name		varchar(30),
-	homeowner_id		varchar(8) not null,
-	street_address		varchar(40) not null,
-	network_num    		varchar(8),
-	username			varchar(45),
-	pass				varchar(32),
-	primary key			(homeowner_id),
-	primary key			(street_address),
-	foreign key			(network_num) references security_network(network_num) on delete set null,
-	unique				(username),
-	unique 				(pass)
-	
-);
+
 	
 	
 	
@@ -86,7 +71,7 @@ create table outdoor_camera
      street_address varchar(40),
      network_id     varchar(8),
      primary key    (IP),
-     foreign key    (street_address) references home_and_homeowner(street_address)
+     foreign key    (street_address) references home(street_address)
                     on delete cascade,
      foreign key    (network_id) references camera_network(network_id)
                     on delete set null
@@ -101,7 +86,7 @@ create table incident
      street_address     varchar(40),
      network_id         varchar(8),
      primary key        (incident_id),
-     foreign key        (street_address) references home_and_homeowner(street_address)
+     foreign key        (street_address) references home(street_address)
                         on delete set null,
      foreign key        (network_id) references camera_network(network_id)
                         on delete set null
@@ -112,11 +97,11 @@ create table security_device
      device_IP          varchar(13) not null,
      street_address     varchar(40),
      primary key        (device_IP),
-     foreign key        (street_address) references home_and_homeowner(street_address)
+     foreign key        (street_address) references home(street_address)
                         on delete cascade
     );
 
-/*	
+	
 INSERT homeowner VALUES
 ('Otto', 'Jim', '75640298', '255 Hayward Drive', 'Jim', 'jotto'),
 ('Woodson', 'Charles', '75820931', '8989 Dos Equis Lane', 'Oaky', 'lumber'),
@@ -129,16 +114,8 @@ INSERT home VALUES
 ('Home 3', '(510) 234-8989', '1212 Wayward Court', '11435267'),
 ('Home 4', '(925) 333-5645', '555 Greenville Drive', '11435267'),
 ('Home 5', '(888) 111-2244', '31 Orangevale Road', '11435267');
-*/
+
 	
-	
-	
-INSERT home_and_homeowner VALUES
-('home1', 'contactinfo1','AJ','11111111', '123 Main Street', '00987891', 'user_ajay', 'pass1'),
-('home2', 'contactinfo2','Nick','11111112', '234 Main Street', '00987891', 'user_nick', 'pass2'),
-('home3', 'contactinfo3','David','11111113', '345 Main Street', '00987891', 'user_david', 'pass3'),
-('home4', 'contactinfo4','Romel','11111114', '123 Lemonade Street', '11435267', 'user_romel', 'pass4'),
-('home5', 'contactinfo5','Natalia','11111115', '234 Main Street', '11435267', 'user_natalia', 'pass5');
 		
 	
 	
