@@ -25,27 +25,27 @@ create table employee
 
 
 create table home
-    (home_name      varchar(15), -
-     contact        varchar(15), -
-     street_address varchar(40) not null, - 
-     network_num    varchar(8), -
-     primary key    (street_address),-
+    (home_name      varchar(15), 
+     contact        varchar(15), 
+     street_address varchar(40) not null,
+     network_num    varchar(8), 
+     primary key    (street_address),
      foreign key    (network_num) references security_network(network_num)
                     on delete set null
     );
 	
 create table homeowner
-    (homeowner_lname     varchar(15), -
-     homeowner_fname     varchar(15), -
-     customer_id         varchar(8) not null, -
-     street_address      varchar(40), -
-     username            varchar(45), -
-     pass                varchar(32), -
-     unique              (username), -
-     unique              (pass), -
-     primary key         (customer_id), -
-     foreign key         (street_address) references home(street_address)-
-                          on delete set null-
+    (homeowner_lname     varchar(15), 
+     homeowner_fname     varchar(15), 
+     customer_id         varchar(8) not null, 
+     street_address      varchar(40), 
+     username            varchar(45), 
+     pass                varchar(32), 
+     unique              (username), 
+     unique              (pass), 
+     primary key         (customer_id), 
+     foreign key         (street_address) references home(street_address)
+                          on delete set null
     );
 
 	
@@ -101,6 +101,30 @@ create table security_device
                         on delete cascade
     );
 
+--M:N Relationships
+create table occurs_in(
+	incident_id        varchar(8) not null,
+	network_id     varchar(8) not null,
+	primary key (incident_id, network_id),
+	foreign key (incident_id) references incident(incident_id) on delete cascade, --given there is a deleted incident, the incident should be deleted.
+	foreign key (network_id) references camera_network(network_id)	--A camera network can exist with no incidents.
+);
+
+create table managed_by(
+	network_num    varchar(8) not null,
+	employee_id    varchar(8) not null,
+	primary key (incident_id, network_id),
+	foreign key (network_num) references security_network(network_num) on delete cascade, -- a security network cannot exists without an employee managing it.
+	foreign key (employee_id) references employee(employee_id) -- an employee can exists even if they dont own a security network. 
+);
+	
+create table includes(
+	street_address varchar(40) not null,
+	incident_id    varchar(8) not null,
+	primary key (incident_id, incident),
+	foreign key (street_address) references home(street_address), -- a house can exist without an incident.
+	foreign key (incident_id) references incident(incident_id) on delete cascade --given there is a deleted incident, the incident should be deleted.
+);
 	
 INSERT homeowner VALUES
 ('Otto', 'Jim', '75640298', '255 Hayward Drive', 'Jim', 'jotto'),
