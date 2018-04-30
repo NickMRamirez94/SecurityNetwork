@@ -2,13 +2,17 @@ import mysql.connector
 from mysql.connector import errorcode
 from cryptography.fernet import Fernet
 from prettytable import PrettyTable
+from time import gmtime, strftime
+
+fh = open("Query_log.txt,w")
+
 
 #Create a connection to the local database
 cnx = mysql.connector.connect(user='root', password='password', database='security')
 
 ########################################################################################
 ##Initial function called in main(). Will return the username and password of the user##
-####################################################################################### 
+#######################################################################################
 def Login():
     username = raw_input("Username: ")
     password = raw_input("Password: ")
@@ -23,6 +27,8 @@ def VerifyClient(username, password):
 
     query = ("SELECT * FROM homeowner WHERE username=%s AND pass=%s")
     cursor.execute(query, (username, password))
+    fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    fh.write(query, (username, password))
     result = cursor.fetchall()
     cursor.close()
 
@@ -39,6 +45,8 @@ def VerifyAdmin(username, password):
 
     query = ("SELECT * FROM employee WHERE username=%s AND pass=%s")
     cursor.execute(query, (username, password))
+    fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    fh.write(query, (username, password))
     result = cursor.fetchall()
     cursor.close()
 
@@ -56,6 +64,8 @@ def WelcomeClient(username):
     query = ("SELECT homeowner_fname, homeowner_lname, home_name, street_address FROM homeowner NATURAL JOIN home WHERE username=")
     query = query + "'" + username + "'"
     cursor.execute(query)
+    fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    fh.write(query)
     result = cursor.fetchone()
     cursor.close()
 
@@ -89,6 +99,8 @@ def WelcomeAdmin(username):
     query = ("SELECT fname, lname FROM employee WHERE username=")
     query = query + "'" + username + "'"
     cursor.execute(query)
+    fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    fh.write(query)
     result = cursor.fetchone()
     cursor.close()
 
@@ -124,7 +136,7 @@ def WelcomeAdmin(username):
         elif (choice == 9):
             pass
         else:
-            print("Sorry that is an invalid choice!\n")  
+            print("Sorry that is an invalid choice!\n")
 
 #########################################
 ##Main menu for the client (homeowners)##
@@ -189,6 +201,8 @@ def SupervisorFunctions(username):
     query = ("SELECT supervisor FROM employee WHERE username=")
     query = query + "'" + username + "'"
     cursor.execute(query)
+    fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    fh.write(query)
     result = cursor.fetchall()
     cursor.close()
 
@@ -218,6 +232,8 @@ def ViewIncidents(username):
     query = ("SELECT * FROM incident NATURAL JOIN home NATURAL JOIN homeowner WHERE homeowner.username=")
     query = query + "'" + username + "'"
     cursor.execute(query)
+    fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    fh.write(query)
     results = cursor.fetchall()
     cursor.close()
 
@@ -247,6 +263,8 @@ def AddCameras(username):
     query = ("SELECT street_address FROM homeowner WHERE username=")
     query = query + "'" + username + "'"
     cursor.execute(query)
+    fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    fh.write(query)
     result = cursor.fetchone()
     cursor.close()
     street_address = result[0]
@@ -256,6 +274,8 @@ def AddCameras(username):
     query = ("SELECT IP, cam_name, network_id FROM outdoor_camera WHERE street_address=")
     query = query + "'" + street_address + "'"
     cursor.execute(query)
+    fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    fh.write(query)
     results = cursor.fetchall()
     cursor.close()
 
@@ -297,11 +317,13 @@ def AddCameras(username):
     add_camera = add_camera + "'" + camera_name + "', "
     add_camera = add_camera + "'" + street_address + "', "
     add_camera = add_camera + "'" + network_ID + "');"
-    
+
     try:
         print("Entering Cameras into system.....")
         print
         cursor.execute(add_camera)
+        fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+        fh.write(add_camera)
         cnx.commit()
         print("...Done..")
         print
@@ -329,6 +351,8 @@ def DeleteCameras(username):
     query = ("SELECT street_address FROM homeowner WHERE username=")
     query = query + "'" + username + "'"
     cursor.execute(query)
+    fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    fh.write(query)
     result = cursor.fetchone()
     cursor.close()
     street_address = result[0]
@@ -338,6 +362,8 @@ def DeleteCameras(username):
     query = ("SELECT IP, cam_name, network_id FROM outdoor_camera WHERE street_address=")
     query = query + "'" + street_address + "'"
     cursor.execute(query)
+    fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    fh.write(query)
     results = cursor.fetchall()
     cursor.close()
 
@@ -365,11 +391,13 @@ def DeleteCameras(username):
         delete_camera = ("DELETE c FROM outdoor_camera as c ")
         delete_camera = delete_camera + "WHERE c.IP="
         delete_camera = delete_camera + "'" + camera_IP + "' "
-        
+
         try:
             print("Deleting camera from system.....")
             print
             cursor.execute(delete_camera)
+            fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+            fh.write(delete_camera)
             cnx.commit()
             print("...Done..")
             print
@@ -432,11 +460,13 @@ def CreateUser():
     add_customer = add_customer + "'" + street_address + "', "
     add_customer = add_customer + "'" + username + "', "
     add_customer = add_customer + "'" + password + "');"
-    
+
     try:
         print("Entering user into system.....")
         print
         cursor.execute(add_customer)
+        fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+        fh.write(add_customer)
         cnx.commit()
         print("...Done..")
         print
@@ -466,6 +496,8 @@ def CreateHome(username):
     query = query + "employee WHERE employee.username="
     query = query + "'" + username + "'"
     cursor.execute(query)
+    fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    fh.write(query)
     result = cursor.fetchone()
     cursor.close()
     network_num = result[0]
@@ -492,11 +524,13 @@ def CreateHome(username):
     add_home = add_home + "'" + contact + "', "
     add_home = add_home + "'" + street_address + "', "
     add_home = add_home + "'" + network_num + "');"
-    
+
     try:
         print("Entering home into system.....")
         print
         cursor.execute(add_home)
+        fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+        fh.write(add_home)
         cnx.commit()
         print("...Done..")
         print
@@ -528,6 +562,8 @@ def DeleteHome(username):
     query = query + "employee WHERE employee.username="
     query = query + "'" + username + "'"
     cursor.execute(query)
+    fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    fh.write(query)
     result = cursor.fetchone()
     cursor.close()
     network_num = result[0]
@@ -539,9 +575,11 @@ def DeleteHome(username):
     query = query + "WHERE network_num="
     query = query + "'" + network_num + "'"
     cursor.execute(query)
+    fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    fh.write(query)
     results = cursor.fetchall()
     cursor.close()
-    
+
     if (len(results) > 0):
         tab = PrettyTable(['Home Name', 'Contact #', 'Street Address'])
         for row in results:
@@ -568,11 +606,13 @@ def DeleteHome(username):
         delete_home = delete_home + "'" + network_num + "' "
         delete_home = delete_home + "AND h.street_address="
         delete_home = delete_home + "'" + street_address + "'"
-        
+
         try:
             print("Deleting home from system.....")
             print
             cursor.execute(delete_home)
+            fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+            fh.write(delete_home)
             cnx.commit()
             print("...Done..")
             print
@@ -580,7 +620,7 @@ def DeleteHome(username):
             print("Sorry an error occured. Most likely that home is not in the system or is not in your network!\n")
 
         cursor.close()
-    
+
     else:
         print("Sorry there are no homes in your network at this time.")
 
@@ -620,11 +660,13 @@ def DeleteCameraNetwork():
     delete_camera_network = ("DELETE c FROM camera_network as c ")
     delete_camera_network = delete_camera_network + "WHERE c.network_id="
     delete_camera_network = delete_camera_network + "'" + network_id + "';"
-    
+
     try:
         print("Deleting Camera Network from system.....")
         print
         cursor.execute(delete_camera_network)
+        fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+        fh.write(delete_camera_network)
         cnx.commit()
         print("...Done..")
         print
@@ -665,7 +707,7 @@ def CreateCameraNetwork(username):
         print
 
         choice = input("1 to confirm. 0 to reenter information.\n")
-    
+
     cursor = cnx.cursor()
 
     query = ("SELECT DISTINCT network_num FROM employee WHERE username=")
@@ -675,6 +717,8 @@ def CreateCameraNetwork(username):
 
     try:
         cursor.execute(query)
+        fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+        fh.write(query)
         result = cursor.fetchone()
         network_num = result[0]
     except mysql.connector.Error as err:
@@ -687,11 +731,13 @@ def CreateCameraNetwork(username):
     add_camera_network = add_camera_network + "'" + server_IP + "', "
     add_camera_network = add_camera_network + "'" + network_id + "', "
     add_camera_network = add_camera_network + "'" + network_num + "');"
-    
+
     try:
         print("Entering Camera Network into system.....")
         print
         cursor.execute(add_camera_network)
+        fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+        fh.write(add_camera_network)
         cnx.commit()
         print("...Done..")
         print
@@ -731,6 +777,8 @@ def ViewIncidentsAdmin():
     query = query + "'" + street_address + "'"
     try:
         cursor.execute(query)
+        fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+        fh.write(query)
     except mysql.connector.Error as err:
         print("Sorry an error has occured. Check Street Address!")
 
@@ -781,11 +829,13 @@ def AddSecurityDevices():
     add_security_device = add_security_device + "'" + device_type + "', "
     add_security_device = add_security_device + "'" + device_IP + "', "
     add_security_device = add_security_device + "'" + street_address + "');"
-    
+
     try:
         print("Entering security devices into system.....")
         print
         cursor.execute(add_security_device)
+        fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+        fh.write(add_camera_network)
         cnx.commit()
         print("...Done..")
         print
@@ -842,6 +892,8 @@ def AddIncidents():
 
     try:
         cursor.execute(query)
+        fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+        fh.write(query)
         result = cursor.fetchone()
         network_id = result[0]
     except mysql.connector.Error as err:
@@ -858,11 +910,13 @@ def AddIncidents():
     add_incident = add_incident + "'" + incident_id + "', "
     add_incident = add_incident + "'" + street_address + "', "
     add_incident = add_incident + "'" + network_id + "');"
-    
+
     try:
         print("Entering security devices into system.....")
         print
         cursor.execute(add_incident)
+        fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+        fh.write(add_incident)
         cnx.commit()
         print("...Done..")
         print
@@ -891,6 +945,8 @@ def AddEmployee():
     query = query + "'" + NET_ID + "'"
 
     cursor.execute(query)
+    fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    fh.write(query)
     result = cursor.fetchall()
     cursor.close()
 
@@ -920,11 +976,13 @@ def AddEmployee():
 
             cursor = cnx.cursor()
             cursor.execute(ADD_EMP)
+            fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+            fh.write(ADD_EMP)
             cursor.close()
 
             cnx.commit()
     except mysql.connector.Error as err:
-        print("Sorry an error occured.!\n")   
+        print("Sorry an error occured.!\n")
 
 ##############################################################################################
 ##Used to create a Security network for a city. The Supervisor must have all pertinent     ##
@@ -962,6 +1020,8 @@ def AddSecurityNetwork():
     try:
         cursor = cnx.cursor()
         cursor.execute(query)
+        fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+        fh.write(query)
         result = cursor.fetchall()
         cursor.close()
 
@@ -977,11 +1037,13 @@ def AddSecurityNetwork():
 
             cursor = cnx.cursor()
             cursor.execute(ADD_NET)
+            fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+            fh.write(ADD_NET)
             cursor.close()
             cnx.commit()
     except mysql.connector.Error as err:
         print("Sorry an error occured.!\n")
-    
+
 
 ##############################################################################################
 ##Used to delete an employee. The Supervisor must have all pertinent information to         ##
@@ -1001,6 +1063,8 @@ def DeleteEmployee():
 
     cursor = cnx.cursor()
     cursor.execute(query)
+    fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    fh.write(query)
     results = cursor.fetchall()
     cursor.close()
 
@@ -1033,6 +1097,8 @@ def DeleteEmployee():
         cursor = cnx.cursor()
         try:
             cursor.execute(query)
+            fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+            fh.write(query)
             result = cursor.fetchone()
             if (len(result) == 0):
                 print("Well.. it looks like that employee doesn't exit\n")
@@ -1042,12 +1108,14 @@ def DeleteEmployee():
                 delete_employee = delete_employee + "'" + EMP_ID + "'"
 
                 cursor.execute(delete_employee)
+                fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+                fh.write(delete_employee)
                 cnx.commit()
-                print("you have sucessfully Fired Somone! rest easy tonight.")        
+                print("you have sucessfully Fired Somone! rest easy tonight.")
                 cursor.close()
         except mysql.connector.Error as err:
             print("Sorry an error occured.!\n")
-        
+
     else:
         print("**Sorry there are no employees in the system yet! Add some first.**")
 
@@ -1071,5 +1139,6 @@ def main():
         print("Error. Not a client or admin!\n")
 
     cnx.close()
+    fh.close()
 
 main()
