@@ -110,13 +110,13 @@ def WelcomeAdmin(username):
         elif (choice ==2):
             DeleteHome(username)
         elif (choice == 3):
-            DeleteCameraNetwork()
+            DeleteCameraNetwork(username)
         elif (choice == 4):
             CreateCameraNetwork(username)
         elif (choice == 5):
-            ViewIncidentsAdmin()
+            ViewIncidentsAdmin(username)
         elif (choice == 6):
-            AddSecurityDevices()
+            AddSecurityDevices(username)
         elif (choice == 7):
             AddIncidents()
         elif (choice == 8):
@@ -269,15 +269,60 @@ def AddCameras(username):
         print
     else:
         print("It looks like you do not have any cameras at this time. Lets add some!\n")
+        print
 
     choice = 2
     while (choice != 1):
         camera_IP = raw_input("Camera IP ** ###.###.##.## **: ")
+
+        #check to see if Camera already in home
+        query = "SELECT * FROM outdoor_camera WHERE IP="
+        query = query + "'" + camera_IP + "' AND street_address="
+        query = query + "'" + street_address + "'"
+        cursor = cnx.cursor()
+        cursor.execute(query)
+        results = cursor.fetchall()
+        cursor.close()
+        if len(results) > 0:
+            print
+            print("**Sorry that Camera IP is already at your home. Try again**")
+            print
+            continue
+
         camera_name = raw_input("Camera Name: ")
-        network_ID = raw_input("Network ID: ")
+
+        #show user current networks
+        query = "SELECT DISTINCT network_id FROM camera_network;"
+        cursor = cnx.cursor()
+        cursor.execute(query)
+        results = cursor.fetchall()
+        cursor.close()
+        tab = PrettyTable(['Network ID'])
+        for row in results:
+            tab.add_row([row[0]])
+        print
+        print("Here are the current Camera Networks")
+        print(tab)
+        print
+
+        #Get the network ID
+        network_ID = raw_input("Network ID (8 digit format): ")
         if (len(network_ID) != 8):
             print
             print("**Network ID must be 8 characters long. Try again.**")
+            print
+            continue
+            
+        #check to make sure in system
+        query = "SELECT * FROM camera_network WHERE network_id="
+        query = query + "'" + network_ID + "'"
+        cursor = cnx.cursor()
+        cursor.execute(query)
+        results = cursor.fetchall()
+        cursor.close()
+        if len(results) < 1:
+            print
+            print("**Sorry that Network ID is not in the system. Try Again**")
             print
             continue
 
@@ -351,7 +396,21 @@ def DeleteCameras(username):
 
         choice = 2
         while (choice != 1):
-            camera_IP = raw_input("Camera IP: ")
+            camera_IP = raw_input("Camera IP ** ###.###.##.## **: ")
+            
+            #check to make sure that IP is in the system
+            query = "SELECT * FROM outdoor_camera WHERE IP="
+            query = query + "'" + camera_IP + "' AND street_address="
+            query = query + "'" + street_address + "'"
+            cursor = cnx.cursor()
+            cursor.execute(query)
+            results = cursor.fetchall()
+            cursor.close()
+            if len(results) < 1:
+                print
+                print("**Sorry that camera is not a part of your home. Please try again**")
+                print
+                continue
 
             print("\n_____________Please confirm this information_________________\n")
             print
@@ -397,16 +456,43 @@ def CreateUser():
     print
     print
 
+    print("Here are all the current customers in the system.")
+    query = "SELECT homeowner_fname, homeowner_lname, customer_id, street_address "
+    query = query + "FROM homeowner;"
+    cursor = cnx.cursor()
+    cursor.execute(query)
+    results = cursor.fetchall()
+    cursor.close()
+    tab = PrettyTable(['First Name', 'Last Name', 'Customer ID', 'Street Address'])
+    for row in results:
+        tab.add_row([row[0], row[1], row[2], row[3]])
+    print
+    print(tab)
+    print
+
     choice = 2
     while (choice != 1):
         homeowner_fname = raw_input("Homeowner first name: ")
         homeowner_lname = raw_input("Homeowner last name: ")
-        customer_id = raw_input("Customer id: ")
+        customer_id = raw_input("Customer ID (8 digit format): ")
         if (len(customer_id) != 8):
             print
             print("**Sorry. The customer ID is not the correct length. Please try again**")
             print
             continue
+        #check if user already in system
+        query = "SELECT * FROM homeowner WHERE customer_id="
+        query = query + "'" + customer_id + "'"
+        cursor = cnx.cursor()
+        cursor.execute(query)
+        results = cursor.fetchall()
+        cursor.close()
+        if len(results) > 0:
+            print
+            print("**Sorry that customer is already in the system. Please try again.**")
+            print
+            continue
+
         street_address = raw_input("Street Address: ")
         username = raw_input("Username: ")
         password = raw_input("Temp Password: ")
@@ -470,11 +556,37 @@ def CreateHome(username):
     cursor.close()
     network_num = result[0]
 
+    #Show current homes
+    cursor = cnx.cursor()
+    query = "SELECT home_name, contact, street_address FROM home"
+    cursor.execute(query)
+    results = cursor.fetchall()
+    cursor.close()
+    tab = PrettyTable(['Home Name', 'Contact', 'Street Address'])
+    for row in results:
+        tab.add_row([row[0], row[1], row[2]])
+    print
+    print("Here are the current homes in the system")
+    print(tab)
+    print
+
     choice = 2
     while (choice != 1):
         home_name = raw_input("Home Name: ")
         contact = raw_input("Phone Number ** (###) ###-#### **: ")
         street_address = raw_input("Street Address: ")
+
+        query = "SELECT * FROM home WHERE street_address="
+        query = query + "'" + street_address + "'"
+        cursor = cnx.cursor()
+        cursor.execute(query)
+        results = cursor.fetchall()
+        cursor.close()
+        if len(results) > 0:
+            print
+            print("**Sorry that home address is already in the system. Please try again.**")
+            print
+            continue
 
         print("\n_____________Please confirm this information_________________\n")
         print
@@ -588,7 +700,7 @@ def DeleteHome(username):
 ##Used to delete a Camera Network. The employee must have all pertinent information for     ##
 ##                           the Camera Network to be deleted from the system.              ##
 ##############################################################################################
-def DeleteCameraNetwork():
+def DeleteCameraNetwork(username):
     print
     print("-------------------Delete Camera Network-------------------")
     print("Here is where we will be able to delete a Camera")
@@ -599,39 +711,84 @@ def DeleteCameraNetwork():
     print
     print
 
-    choice = 2
-    while (choice != 1):
-        network_id = raw_input("Camera Network ID: ")
-        if (len(network_id) != 8):
-            print
-            print("**Sorry. The Network ID is not the correct length. Please try again**")
-            print
-            continue
-
-        print("\n_____________Please confirm this information_________________\n")
-        print
-        print("Camera Network ID: " + network_id)
-        print
-
-        choice = input("1 to confirm. 0 to reenter information.\n")
-
+    #Show the employee the list Camera networks on their network
+    #Retrieve network number. All employees have a network number.
     cursor = cnx.cursor()
-
-    delete_camera_network = ("DELETE c FROM camera_network as c ")
-    delete_camera_network = delete_camera_network + "WHERE c.network_id="
-    delete_camera_network = delete_camera_network + "'" + network_id + "';"
-    
-    try:
-        print("Deleting Camera Network from system.....")
-        print
-        cursor.execute(delete_camera_network)
-        cnx.commit()
-        print("...Done..")
-        print
-    except mysql.connector.Error as err:
-        print("Sorry an error occured. Most likely that Camera Network is not in the system!\n")
-
+    query = ("SELECT network_num FROM security_network NATURAL JOIN ")
+    query = query + "employee WHERE employee.username="
+    query = query + "'" + username + "'"
+    cursor.execute(query)
+    result = cursor.fetchone()
     cursor.close()
+    network_num = result[0]
+
+    query = "SELECT server_IP, network_id FROM camera_network WHERE network_num="
+    query = query + "'" + network_num + "'"
+    cursor = cnx.cursor()
+    cursor.execute(query)
+    results = cursor.fetchall()
+    cursor.close()
+
+    if len(results) > 0:
+        tab = PrettyTable(['Server IP', 'Network ID'])
+        for row in results:
+            tab.add_row([row[0], row[1]])
+        print
+        print("Here are the Camera Networks currently in your network")
+        print(tab)
+        print
+
+        choice = 2
+        while (choice != 1):
+            network_id = raw_input("Camera Network ID (8 digit format): ")
+            if (len(network_id) != 8):
+                print
+                print("**Sorry. The Network ID is not the correct length. Please try again**")
+                print
+                continue
+
+            #Verify that this camera network is one from their network
+            query = "SELECT * FROM camera_network WHERE network_num="
+            query = query + "'" + network_num + "' AND network_id="
+            query = query + "'" + network_id + "'"
+            cursor = cnx.cursor()
+            cursor.execute(query)
+            results = cursor.fetchall()
+            cursor.close()
+            if len(results) < 1:
+                print
+                print("**Sorry that is not a valid Network. Please try again**")
+                print
+                continue
+
+            print("\n_____________Please confirm this information_________________\n")
+            print
+            print("Camera Network ID: " + network_id)
+            print
+
+            choice = input("1 to confirm. 0 to reenter information.\n")
+
+        cursor = cnx.cursor()
+
+        delete_camera_network = ("DELETE c FROM camera_network as c ")
+        delete_camera_network = delete_camera_network + "WHERE c.network_id="
+        delete_camera_network = delete_camera_network + "'" + network_id + "';"
+        
+        try:
+            print("Deleting Camera Network from system.....")
+            print
+            cursor.execute(delete_camera_network)
+            cnx.commit()
+            print("...Done..")
+            print
+        except mysql.connector.Error as err:
+            print("Sorry an error occured. Most likely that Camera Network is not in the system!\n")
+
+        cursor.close()
+    else:
+        print
+        print("**Sorry there are no Camera Networks in your network at this time**")
+        print
 
 ##############################################################################################
 ##Used to create a Camera Network. The employee must have all pertinent information for     ##
@@ -648,13 +805,45 @@ def CreateCameraNetwork(username):
     print
     print
 
+    query = "SELECT server_IP, network_ID FROM camera_network;"
+    cursor = cnx.cursor()
+    cursor.execute(query)
+    results = cursor.fetchall()
+    cursor.close()
+    
+    if len(results) > 0:
+        tab = PrettyTable(['Server IP', 'Network ID'])
+        for row in results:
+            tab.add_row([row[0], row[1]])
+        print
+        print("Here are the Camera Networks currently in the system")
+        print(tab)
+        print
+    else:
+        print
+        print("There are no Camera Networks currently in the system")
+        print
+
     choice = 2
     while (choice != 1):
-        server_IP = raw_input("Server IP: ")
-        network_id = raw_input("Camera Network ID: ")
+        server_IP = raw_input("Server IP ** ###.###.##.## **: ")
+        network_id = raw_input("Camera Network ID (8 digit format): ")
         if (len(network_id) != 8):
             print
             print("**Sorry. The Camera Network ID is not the correct length. Please try again**")
+            print
+            continue
+        
+        #Make sure Network ID not already in system
+        query = "SELECT * FROM camera_network WHERE network_id="
+        query = query + "'" + network_id + "'"
+        cursor = cnx.cursor()
+        cursor.execute(query)
+        results = cursor.fetchall()
+        cursor.close()
+        if len(results) > 0:
+            print
+            print("**Sorry that Camera Network ID is already in the system. Please try again.**")
             print
             continue
 
@@ -704,7 +893,7 @@ def CreateCameraNetwork(username):
 ##Will quiery all instrutions based on street address. Will not print anything unless there is an instrusion    ##
 ##                        The street address will need to be supplied                                           ##
 ##################################################################################################################
-def ViewIncidentsAdmin():
+def ViewIncidentsAdmin(username):
     print
     print("-------------------View Incidents Admin-------------------")
     print("Here is where we will be able to view incidents at a home")
@@ -715,41 +904,73 @@ def ViewIncidentsAdmin():
     print
     print
 
-    choice = 2
-    while (choice != 1):
-        street_address = raw_input("Street Address: ")
-
-        print("\n_____________Please confirm this information_________________\n")
-        print
-        print("Street Address: " + street_address)
-        print
-
-        choice = input("1 to confirm. 0 to reenter information.\n")
+    #Retrieve network number. All employees have a network number.
     cursor = cnx.cursor()
+    query = ("SELECT network_num FROM security_network NATURAL JOIN ")
+    query = query + "employee WHERE employee.username="
+    query = query + "'" + username + "'"
+    cursor.execute(query)
+    result = cursor.fetchone()
+    cursor.close()
+    network_num = result[0]
 
-    query = ("SELECT * FROM incident NATURAL JOIN home NATURAL JOIN homeowner WHERE homeowner.street_address=")
-    query = query + "'" + street_address + "'"
-    try:
-        cursor.execute(query)
-    except mysql.connector.Error as err:
-        print("Sorry an error has occured. Check Street Address!")
-
+    #Show admin a list of all current homes.
+    cursor = cnx.cursor()
+    query = ("SELECT home_name, contact, street_address ")
+    query = query + "FROM home "
+    query = query + "WHERE network_num="
+    query = query + "'" + network_num + "'"
+    cursor.execute(query)
     results = cursor.fetchall()
     cursor.close()
-
-    if len(results) > 0:
-        tab = PrettyTable(['Instrusion Type', 'Amount Lost'])
+    
+    if (len(results) > 0):
+        tab = PrettyTable(['Home Name', 'Contact #', 'Street Address'])
         for row in results:
-            tab.add_row([row[1], row[2]])
+            tab.add_row([row[0], row[1], row[2]])
+        print("Here are the Homes currently in your network.")
         print(tab)
+        print
+
+        choice = 2
+        while (choice != 1):
+            street_address = raw_input("Street Address: ")
+
+            print("\n_____________Please confirm this information_________________\n")
+            print
+            print("Street Address: " + street_address)
+            print
+
+            choice = input("1 to confirm. 0 to reenter information.\n")
+        cursor = cnx.cursor()
+
+        query = ("SELECT * FROM incident NATURAL JOIN home NATURAL JOIN homeowner WHERE homeowner.street_address=")
+        query = query + "'" + street_address + "'"
+        try:
+            cursor.execute(query)
+        except mysql.connector.Error as err:
+            print("Sorry an error has occured. Check Street Address!")
+
+        results = cursor.fetchall()
+        cursor.close()
+
+        if len(results) > 0:
+            tab = PrettyTable(['Instrusion Type', 'Amount Lost'])
+            for row in results:
+                tab.add_row([row[1], row[2]])
+            print(tab)
+        else:
+            print("There are no instrusions at that address at this time.\n")
     else:
-        print("There are no instrusions at that address at this time.\n")
+        print
+        print("There are no homes currently in your network")
+        print
 
 ##############################################################################################
 ##Used to create a Security Device. The employee must have all pertinent information for    ##
 ##                           the Security Device to be added to a home.                     ##
 ##############################################################################################
-def AddSecurityDevices():
+def AddSecurityDevices(username):
     print
     print("-----------------Add Security Devices----------------")
     print("Here is where we will be able to add security devices to")
@@ -760,39 +981,116 @@ def AddSecurityDevices():
     print
     print
 
-    choice = 2
-    while (choice != 1):
-        device_type = raw_input("Device Type: ")
-        device_IP = raw_input("Device IP ** ###.###.##.## **: ")
-        street_address = raw_input("Street Address: ")
-
-        print("\n_____________Please confirm this information_________________\n")
-        print
-        print("Device Type: " + device_type)
-        print("Device IP: " + device_IP)
-        print("Street Address: " + street_address)
-        print
-
-        choice = input("1 to confirm. 0 to reenter information.\n")
-
+    #Retrieve network number. All employees have a network number.
     cursor = cnx.cursor()
-
-    add_security_device = ("INSERT security_device VALUES (")
-    add_security_device = add_security_device + "'" + device_type + "', "
-    add_security_device = add_security_device + "'" + device_IP + "', "
-    add_security_device = add_security_device + "'" + street_address + "');"
-    
-    try:
-        print("Entering security devices into system.....")
-        print
-        cursor.execute(add_security_device)
-        cnx.commit()
-        print("...Done..")
-        print
-    except mysql.connector.Error as err:
-        print("Sorry an error occured. Most likely that home is not in the system yet!\n")
-
+    query = ("SELECT network_num FROM security_network NATURAL JOIN ")
+    query = query + "employee WHERE employee.username="
+    query = query + "'" + username + "'"
+    cursor.execute(query)
+    result = cursor.fetchone()
     cursor.close()
+    network_num = result[0]
+
+    #Show admin a list of all current homes.
+    cursor = cnx.cursor()
+    query = ("SELECT home_name, contact, street_address ")
+    query = query + "FROM home "
+    query = query + "WHERE network_num="
+    query = query + "'" + network_num + "'"
+    cursor.execute(query)
+    results = cursor.fetchall()
+    cursor.close()
+    
+    if (len(results) > 0):
+        tab = PrettyTable(['Home Name', 'Contact #', 'Street Address'])
+        for row in results:
+            tab.add_row([row[0], row[1], row[2]])
+        print("Here are the Homes currently in your network.")
+        print(tab)
+        print
+
+        choice = 2
+        while (choice != 1):
+            street_address = raw_input("Street Address: ")
+            #Verify Street Address in system
+            query = "SELECT * FROM home WHERE street_address="
+            query = query + "'" + street_address + "'"
+            cursor = cnx.cursor()
+            cursor.execute(query)
+            results = cursor.fetchall()
+            cursor.close()
+            if len(results) < 1:
+                print
+                print("**Sorry that home is no in the system**")
+                print
+                continue
+            else:
+                query = "SELECT device_type, device_IP FROM security_device WHERE street_address="
+                query = query + "'" + street_address + "'"
+                cursor = cnx.cursor()
+                cursor.execute(query)
+                results = cursor.fetchall()
+                cursor.close()
+                if len(results) > 0:
+                    tab = PrettyTable(['Device Type', 'Device IP'])
+                    for row in results:
+                        tab.add_row([row[0], row[1]])
+                    print
+                    print("Here are the current Security Devices at that home")
+                    print(tab)
+                    print
+                else:
+                    print
+                    print("There are no security devices tied to that home yet. Let's add some.")
+                    print
+            
+            device_type = raw_input("Device Type: ")
+            device_IP = raw_input("Device IP ** ###.###.##.## **: ")
+            
+            #Check to make sure IP not in system already
+            query = "SELECT * FROM security_device WHERE device_IP="
+            query = query + "'" + device_IP + "'"
+            cursor = cnx.cursor()
+            cursor.execute(query)
+            results = cursor.fetchall()
+            cursor.close()
+            if len(results) > 0:
+                print
+                print("That IP is already in the system")
+                print
+                continue
+            
+            print("\n_____________Please confirm this information_________________\n")
+            print
+            print("Device Type: " + device_type)
+            print("Device IP: " + device_IP)
+            print("Street Address: " + street_address)
+            print
+
+            choice = input("1 to confirm. 0 to reenter information.\n")
+
+        cursor = cnx.cursor()
+
+        add_security_device = ("INSERT security_device VALUES (")
+        add_security_device = add_security_device + "'" + device_type + "', "
+        add_security_device = add_security_device + "'" + device_IP + "', "
+        add_security_device = add_security_device + "'" + street_address + "');"
+        
+        try:
+            print("Entering security devices into system.....")
+            print
+            cursor.execute(add_security_device)
+            cnx.commit()
+            print("...Done..")
+            print
+        except mysql.connector.Error as err:
+            print("Sorry an error occured. Most likely that home is not in the system yet!\n")
+
+        cursor.close()
+    else:
+        print
+        print("There are no homes in your network")
+        print
 
 ##############################################################################################
 ##Used to add an Incident to a home. The employee must have all pertinent information for   ##
@@ -815,7 +1113,7 @@ def AddIncidents():
         lost_equity = raw_input("Lost Equity: ")
         occured_time = raw_input("Occured Time **hh:mm:ss**: ")
         current_day = raw_input("Day Occured **yyyy:mm:dd**: ")
-        incident_id = raw_input("Incident ID: ")
+        incident_id = raw_input("Incident ID (8 digit format): ")
         if (len(incident_id) != 8):
             print
             print("**Sorry. The Incident ID is not the correct length. Please try again**")
@@ -884,7 +1182,7 @@ def AddEmployee():
     print
 
     print("enter in which security nework will this employee work under?")
-    NET_ID = raw_input("Network Identification number: ")
+    NET_ID = raw_input("Network ID (8 digit format): ")
 
     cursor = cnx.cursor()
     query = ("SELECT loc FROM security_network where network_num =")

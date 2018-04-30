@@ -24,7 +24,7 @@ create table employee
     );
 
 create table home
-    (home_name      varchar(15),
+    (home_name      varchar(30),
      contact        varchar(15),
      street_address varchar(40) not null,
      network_num    varchar(8),
