@@ -876,21 +876,180 @@ def AddIncidents():
 ##                         give the employee a temporary password.                         ##
 ##############################################################################################
 def AddEmployee():
-    pass
+    print
+    print("--------------------ADD employee---------------------")
+    print("This will add an employee to the system")
+    print("The menu following will prompt you on what is needed")
+    print("-----------------------------------------------------")
+    print
+
+    print("enter in which security nework will this employee work under?")
+    NET_ID = raw_input("Network Identification number: ")
+
+    cursor = cnx.cursor()
+    query = ("SELECT loc FROM security_network where network_num =")
+    query = query + "'" + NET_ID + "'"
+
+    cursor.execute(query)
+    result = cursor.fetchall()
+    cursor.close()
+
+    try:
+        if (len(result) == 0):
+            print("The network you entered was not found")
+        else:
+            print("enter in the new name of the employee you wish to add\n")
+            EMP_FNAME = raw_input("New employee first name: ")
+            EMP_LNAME = raw_input("New employee last name: ")
+            print("enter in the new Login name and Password \n")
+            EMP_USERN = raw_input("New employee login name: ")
+            EMP_PASS  = raw_input("New employee user password ")
+
+
+            print("enter in the id of the employee")
+            EMP_ID = raw_input("New employee ID: ")
+
+            ADD_EMP = "INSERT employee VALUES ("
+            ADD_EMP = ADD_EMP + "'" + EMP_ID + "', "
+            ADD_EMP = ADD_EMP + "false, "
+            ADD_EMP = ADD_EMP + "'" + EMP_LNAME + "', "
+            ADD_EMP = ADD_EMP + "'" + EMP_FNAME + "', "
+            ADD_EMP = ADD_EMP + "'" + EMP_USERN + "', "
+            ADD_EMP = ADD_EMP + "'" + EMP_PASS + "', "
+            ADD_EMP = ADD_EMP + "'" + NET_ID + "');"
+
+            cursor = cnx.cursor()
+            cursor.execute(ADD_EMP)
+            cursor.close()
+
+            cnx.commit()
+    except mysql.connector.Error as err:
+        print("Sorry an error occured.!\n")   
 
 ##############################################################################################
 ##Used to create a Security network for a city. The Supervisor must have all pertinent     ##
 ##             information for the Security Network to be added to the system              ##
 ##############################################################################################
 def AddSecurityNetwork():
-    pass
+    print
+    print("-------------------Add network---------------------")
+    print("This will expand your Network into a new city")
+    print("Information needed to perform this operation")
+    print("will be prompted")
+    print("-----------------------------------------------------")
+    print
+
+    choice = 2
+    while (choice != 1):
+        NET_LOC = raw_input("Network Location: ")
+        NET_ID = raw_input("Network ID number (8 digit format): ")
+        if (len(NET_ID) != 8):
+            print
+            print("**Sorry. The Network ID is not the correct length. Please try again**")
+            print
+            continue
+
+        print("\n_____________Please confirm this information_________________\n")
+        print
+        print("Network Location: " + NET_LOC)
+        print("Network ID: " + NET_ID)
+        print
+
+        choice = input("1 to confirm. 0 to reenter information.\n")
+
+    query = (" select* from security_network Where network_num ='")
+    query = query + NET_ID + "'"
+    try:
+        cursor = cnx.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
+        cursor.close()
+
+        if (len(result) > 0):
+            print("**It appears the the network ID you are adding already exist**")
+            print("**Please check you ID number and reattempt if necessary**")
+        else:
+            print("OK, adding this network to the system")
+
+            ADD_NET = "INSERT security_network VALUES ("
+            ADD_NET = ADD_NET + "'" + NET_LOC + "', "
+            ADD_NET = ADD_NET + "'" + NET_ID + "');"
+
+            cursor = cnx.cursor()
+            cursor.execute(ADD_NET)
+            cursor.close()
+            cnx.commit()
+    except mysql.connector.Error as err:
+        print("Sorry an error occured.!\n")
+    
 
 ##############################################################################################
 ##Used to delete an employee. The Supervisor must have all pertinent information to         ##
 ##                         remove the employee from the system.                             ##
 ##############################################################################################
 def DeleteEmployee():
-    pass
+
+    print
+    print("----------------Employee Deletion--------------------")
+    print("This will perminantly delete an employee from the system")
+    print("You will need the Employee ID to execute")
+    print("This is permentant, pleese check before you can people")
+    print("-----------------------------------------------------")
+    print
+
+    query = "SELECT employee_id, lname, fname FROM employee;"
+
+    cursor = cnx.cursor()
+    cursor.execute(query)
+    results = cursor.fetchall()
+    cursor.close()
+
+    if len(results) > 0:
+        tab = PrettyTable(['Employee ID', 'First Name', 'Last Name'])
+        for row in results:
+            tab.add_row([row[0], row[1], row[2]])
+        print(tab)
+        print
+
+        choice = 2
+        while (choice != 1):
+            EMP_ID = raw_input("Employee ID: ")
+            if (len(EMP_ID) != 8):
+                print
+                print("**Sorry. The Employee ID is not the correct length. Please try again**")
+                print
+                continue
+
+            print("\n_____________Please confirm this information_________________\n")
+            print
+            print("Employee ID: " + EMP_ID)
+            print
+
+            choice = input("1 to confirm. 0 to reenter information.\n")
+
+        query = ("Select * from employee where employee_id = ")
+        query = query + "'" + EMP_ID + "'"
+
+        cursor = cnx.cursor()
+        try:
+            cursor.execute(query)
+            result = cursor.fetchone()
+            if (len(result) == 0):
+                print("Well.. it looks like that employee doesn't exit\n")
+                print("thats embarassing, come back when you know what you are doing")
+            else:
+                delete_employee = "DELETE e FROM employee as e WHERE employee_id="
+                delete_employee = delete_employee + "'" + EMP_ID + "'"
+
+                cursor.execute(delete_employee)
+                cnx.commit()
+                print("you have sucessfully Fired Somone! rest easy tonight.")        
+                cursor.close()
+        except mysql.connector.Error as err:
+            print("Sorry an error occured.!\n")
+        
+    else:
+        print("**Sorry there are no employees in the system yet! Add some first.**")
 
 
 #########################
