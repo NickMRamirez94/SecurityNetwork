@@ -5,7 +5,7 @@ from prettytable import PrettyTable
 from time import gmtime, strftime
 
 fh = open("Query_log.txt,w")
-
+key = Fernet("100")
 
 #Create a connection to the local database
 cnx = mysql.connector.connect(user='root', password='password', database='security')
@@ -24,6 +24,7 @@ def Login():
 ############################################################################
 def VerifyClient(username, password):
     cursor = cnx.cursor()
+    password = key.encypt(password)
 
     query = ("SELECT * FROM homeowner WHERE username=%s AND pass=%s")
     cursor.execute(query, (username, password))
@@ -42,6 +43,7 @@ def VerifyClient(username, password):
 #############################################################################
 def VerifyAdmin(username, password):
     cursor = cnx.cursor()
+    password = key.encypt(password)
 
     query = ("SELECT * FROM employee WHERE username=%s AND pass=%s")
     cursor.execute(query, (username, password))
@@ -960,7 +962,7 @@ def AddEmployee():
             print("enter in the new Login name and Password \n")
             EMP_USERN = raw_input("New employee login name: ")
             EMP_PASS  = raw_input("New employee user password ")
-
+            EMP_PASS = key.encypt(EMP_pass)
 
             print("enter in the id of the employee")
             EMP_ID = raw_input("New employee ID: ")
@@ -1037,7 +1039,6 @@ def AddSecurityNetwork():
 
             cursor = cnx.cursor()
             cursor.execute(ADD_NET)
-            fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
             fh.write(ADD_NET)
             cursor.close()
             cnx.commit()
@@ -1108,7 +1109,6 @@ def DeleteEmployee():
                 delete_employee = delete_employee + "'" + EMP_ID + "'"
 
                 cursor.execute(delete_employee)
-                fh.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
                 fh.write(delete_employee)
                 cnx.commit()
                 print("you have sucessfully Fired Somone! rest easy tonight.")
