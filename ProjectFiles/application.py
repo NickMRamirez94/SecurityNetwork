@@ -3,7 +3,7 @@ from time import gmtime, strftime
 from prettytable import PrettyTable
 
 #Create a connection to the local database
-cnx = mysql.connector.connect(user='root', password='smackdown2', database='security')
+cnx = mysql.connector.connect(user='root', password='password', database='security')
 
 F = open("log.txt", "a")
 
