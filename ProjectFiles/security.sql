@@ -11,8 +11,8 @@ create table security_network
 create table employee
     (employee_id    varchar(8) not null,
      supervisor     boolean default false,
-     lname          varchar(15),
-     fname          varchar(15),
+     lname          varchar(30),
+     fname          varchar(30),
      username       varchar(45),
      pass           varchar(32),
      network_num    varchar(8),
@@ -23,37 +23,15 @@ create table employee
                     on delete set null
     );
 
-
 create table home
-    (home_name      varchar(15), 
-     contact        varchar(15), 
+    (home_name      varchar(30),
+     contact        varchar(25),
      street_address varchar(40) not null,
-     network_num    varchar(8), 
+     network_num    varchar(8),
      primary key    (street_address),
      foreign key    (network_num) references security_network(network_num)
                     on delete set null
     );
-	
-create table homeowner
-    (homeowner_lname     varchar(15), 
-     homeowner_fname     varchar(15), 
-     customer_id         varchar(8) not null, 
-     street_address      varchar(40), 
-     username            varchar(45), 
-     pass                varchar(32), 
-     unique              (username), 
-     unique              (pass), 
-     primary key         (customer_id), 
-     foreign key         (street_address) references home(street_address)
-                          on delete set null
-    );
-
-	
-	
-
-	
-	
-	
 
 create table camera_network
     (server_IP      varchar(13),
@@ -62,7 +40,7 @@ create table camera_network
      unique         (server_IP),
      primary key    (network_id),
      foreign key    (network_num) references security_network(network_num)
-                    on delete set null
+                    on delete cascade
     );
 
 create table outdoor_camera
@@ -78,7 +56,7 @@ create table outdoor_camera
     );
 
 create table incident
-    (instrusion_type    varchar(15),
+    (instrusion_type    varchar(45),
      lost_equity        varchar(10),
      occured_time       time,
      current_day        date,
@@ -93,7 +71,7 @@ create table incident
     );
 
 create table security_device
-    (device_type        varchar(25),
+    (device_type        varchar(40),
      device_IP          varchar(13) not null,
      street_address     varchar(40),
      primary key        (device_IP),
@@ -101,36 +79,55 @@ create table security_device
                         on delete cascade
     );
 
---M:N Relationships
-create table occurs_in(
-	incident_id        varchar(8) not null,
-	network_id     varchar(8) not null,
-	primary key (incident_id, network_id),
-	foreign key (incident_id) references incident(incident_id) on delete cascade, --given there is a deleted incident, the incident should be deleted.
-	foreign key (network_id) references camera_network(network_id)	--A camera network can exist with no incidents.
+create table homeowner
+    (homeowner_lname     varchar(30),
+     homeowner_fname     varchar(30),
+     customer_id         varchar(8) not null,
+     street_address      varchar(40),
+     username            varchar(45),
+     pass                varchar(32),
+     unique              (username),
+     unique              (pass),
+     primary key         (customer_id),
+     foreign key         (street_address) references home(street_address)
+                          on delete set null
+    );
+
+create table occurs_in
+    (
+	incident_id         varchar(8) not null,
+	network_id          varchar(8) not null,
+	primary key         (incident_id, network_id),
+	foreign key         (incident_id) references incident(incident_id) on delete cascade, 
+	foreign key         (network_id)  references camera_network(network_id) on delete cascade
 );
 
 create table managed_by(
 	network_num    varchar(8) not null,
 	employee_id    varchar(8) not null,
-	primary key (incident_id, network_id),
-	foreign key (network_num) references security_network(network_num) on delete cascade, -- a security network cannot exists without an employee managing it.
-	foreign key (employee_id) references employee(employee_id) -- an employee can exists even if they dont own a security network. 
+	primary key (network_num, employee_id),
+	foreign key (network_num) references security_network(network_num) on delete cascade, 
+	foreign key (employee_id) references employee(employee_id) on delete cascade
 );
 	
 create table includes(
 	street_address varchar(40) not null,
 	incident_id    varchar(8) not null,
-	primary key (incident_id, incident),
-	foreign key (street_address) references home(street_address), -- a house can exist without an incident.
-	foreign key (incident_id) references incident(incident_id) on delete cascade --given there is a deleted incident, the incident should be deleted.
+	primary key (street_address, incident_id),
+	foreign key (street_address) references home(street_address) on delete cascade,
+	foreign key (incident_id) references incident(incident_id) on delete cascade
 );
-	
-INSERT homeowner VALUES
-('Otto', 'Jim', '75640298', '255 Hayward Drive', 'Jim', 'jotto'),
-('Woodson', 'Charles', '75820931', '8989 Dos Equis Lane', 'Oaky', 'lumber'),
-('Jett', 'James', '98756519', '1212 Wayward Court', 'JJ', 'fastest'),
-('Gannon', 'Rich', '88787232', '555 Greenville Drive', 'Richyboi', 'interception');
+
+INSERT security_network VALUES
+('Kingsburg', '00987891'),
+('San Francisco', '11435267');
+
+INSERT employee VALUES
+('74839654', true, 'Brassfield', 'David', 'dbfield12', 'Ebwje', '00987891'),
+('35278908', false, 'Ramirez', 'Nicholas', 'nramirez', 'Ojdl', '11435267'),
+('76454435', false, 'Curam', 'Ajay', 'acuram', 'bkbz', '11435267'),
+('77789000', false, 'Jones', 'Julio', 'jjones', 'Kvmjp', '00987891');
+
 
 INSERT home VALUES
 ('Home 1', '(123) 123-4567', '255 Hayward Drive', '00987891'),
@@ -138,21 +135,6 @@ INSERT home VALUES
 ('Home 3', '(510) 234-8989', '1212 Wayward Court', '11435267'),
 ('Home 4', '(925) 333-5645', '555 Greenville Drive', '11435267'),
 ('Home 5', '(888) 111-2244', '31 Orangevale Road', '11435267');
-
-	
-		
-	
-	
-INSERT security_network VALUES
-('Kingsburg', '00987891'),
-('San Francisco', '11435267');
-
-INSERT employee VALUES
-('74839654', true, 'Brassfield', 'David', 'dbfield12', 'David', '00987891'),
-('35278908', false, 'Ramirez', 'Nicholas', 'nramirez', 'Nick', '11435267'),
-('76454435', false, 'Curam', 'Ajay', 'acuram', 'Ajay', '11435267'),
-('77789000', false, 'Jones', 'Julio', 'jjones', 'Julio', '00987891');
-
 
 INSERT camera_network VALUES
 ('123.456.90.87', '87654564', '00987891'),
@@ -177,3 +159,20 @@ INSERT security_device VALUES
 ('Smoke Detector', '844.345.99.00', '255 Hayward Drive'),
 ('Motion Detector', '120.902.20.02', '255 Hayward Drive');
 
+INSERT homeowner VALUES
+('Otto', 'Jim', '75640298', '255 Hayward Drive', 'Jim', 'kpuup'),
+('Woodson', 'Charles', '75820931', '8989 Dos Equis Lane', 'Oaky', 'mvncfs'),
+('Jett', 'James', '98756519', '1212 Wayward Court', 'JJ', 'gbtuftu'),
+('Gannon', 'Rich', '88787232', '555 Greenville Drive', 'Richyboi', 'joufsdfqujpo');
+
+INSERT occurs_in VALUES
+('88888888', '87654564');
+
+INSERT managed_by VALUES
+('00987891', '74839654'),
+('11435267', '35278908'),
+('11435267', '76454435'),
+('00987891', '77789000');
+
+INSERT includes VALUES
+('8989 Dos Equis Lane', '88888888');
